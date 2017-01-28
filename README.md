@@ -160,11 +160,9 @@ Configure the Uncomplicated Firewall (UFW) to only allow incoming connections fo
 6. Rename the project's name `sudo mv ./item-catalog ./FlaskApp`
 7. Move to the inner FlaskApp directory using `cd FlaskApp`
 8. Rename `website.py` to `__init__.py` using `sudo mv website.py __init__.py`
-//9. Edit `database_setup.py`, `website.py` and `functions_helper.py` and change `engine = create_engine('sqlite:///toyshop.db')` to `engine = create_engine('postgresql://catalog:password@localhost/catalog')`
-10. Install pip `sudo apt-get install python-pip`
-11. Use pip to install dependencies `sudo pip install -r requirements.txt`
-12. Install psycopg2 `sudo apt-get -qqy install postgresql python-psycopg2`
-//13. Create database schema `sudo python database_setup.py`
+9. Install pip `sudo apt-get install python-pip`
+10. Use pip to install dependencies `sudo pip install -r requirements.txt`
+11. Install psycopg2 `sudo apt-get -qqy install postgresql python-psycopg2`
 
 
 ## Configure and Enable a New Virtual Host
