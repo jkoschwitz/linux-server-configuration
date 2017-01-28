@@ -108,15 +108,20 @@ Configure the Uncomplicated Firewall (UFW) to only allow incoming connections fo
 	sudo ufw enable 
  
 ## Configure the local timezone to UTC
+
 1. Configure the time zone `sudo dpkg-reconfigure tzdata`
 2. It is already set to UTC.
 
+
 ## Install and configure Apache to serve a Python mod_wsgi application
+
 1. Install Apache `sudo apt-get install apache2`
 2. Install mod_wsgi `sudo apt-get install python-setuptools libapache2-mod-wsgi`
 3. Restart Apache `sudo service apache2 restart`
 
+
 ## Install and configure PostgreSQL
+
 1. Install PostgreSQL `sudo apt-get install postgresql`
 2. Check if no remote connections are allowed `sudo vim /etc/postgresql/9.3/main/pg_hba.conf`
 3. Login as user "postgres" `sudo su - postgres`
@@ -130,7 +135,7 @@ Configure the Uncomplicated Firewall (UFW) to only allow incoming connections fo
 5. Set a password for user catalog
 	
 	```
-	postgres=# ALTER ROLE catalog WITH PASSWORD 'password';
+	postgres=# ALTER ROLE catalog WITH PASSWORD '123';
 	```
 6. Give user "catalog" permission to "catalog" application database
 	
@@ -143,30 +148,34 @@ Configure the Uncomplicated Firewall (UFW) to only allow incoming connections fo
 	```
 	exit
 	```
+
  
 ## Install git, clone and setup your Catalog App project.
+
 1. Install Git using `sudo apt-get install git`
 2. Use `cd /var/www` to move to the /var/www directory 
 3. Create the application directory `sudo mkdir FlaskApp`
 4. Move inside this directory using `cd FlaskApp`
-5. Clone the Catalog App to the virtual machine `git clone https://github.com/kongling893/Item_Catalog_UDACITY.git`
-6. Rename the project's name `sudo mv ./Item_Catalog_UDACITY ./FlaskApp`
+5. Clone the Catalog App to the virtual machine `sudo git clone https://github.com/jkoschwitz/item-catalog`
+6. Rename the project's name `sudo mv ./item-catalog ./FlaskApp`
 7. Move to the inner FlaskApp directory using `cd FlaskApp`
 8. Rename `website.py` to `__init__.py` using `sudo mv website.py __init__.py`
-9. Edit `database_setup.py`, `website.py` and `functions_helper.py` and change `engine = create_engine('sqlite:///toyshop.db')` to `engine = create_engine('postgresql://catalog:password@localhost/catalog')`
+//9. Edit `database_setup.py`, `website.py` and `functions_helper.py` and change `engine = create_engine('sqlite:///toyshop.db')` to `engine = create_engine('postgresql://catalog:password@localhost/catalog')`
 10. Install pip `sudo apt-get install python-pip`
 11. Use pip to install dependencies `sudo pip install -r requirements.txt`
 12. Install psycopg2 `sudo apt-get -qqy install postgresql python-psycopg2`
-13. Create database schema `sudo python database_setup.py`
+//13. Create database schema `sudo python database_setup.py`
+
 
 ## Configure and Enable a New Virtual Host
+
 1. Create FlaskApp.conf to edit: `sudo nano /etc/apache2/sites-available/FlaskApp.conf`
 2. Add the following lines of code to the file to configure the virtual host. 
 	
 	```
 	<VirtualHost *:80>
 		ServerName 35.167.117.191
-		ServerAdmin qiaowei8993@gmail.com
+		ServerAdmin admin@gmail.com
 		WSGIScriptAlias / /var/www/FlaskApp/flaskapp.wsgi
 		<Directory /var/www/FlaskApp/FlaskApp/>
 			Order allow,deny
@@ -184,7 +193,9 @@ Configure the Uncomplicated Firewall (UFW) to only allow incoming connections fo
 	```
 3. Enable the virtual host with the following command: `sudo a2ensite FlaskApp`
 
+
 ## Create the .wsgi File
+
 1. Create the .wsgi File under /var/www/FlaskApp: 
 	
 	```
@@ -206,11 +217,6 @@ Configure the Uncomplicated Firewall (UFW) to only allow incoming connections fo
 
 ## Restart Apache
 1. Restart Apache `sudo service apache2 restart `
-
-## References:
-https://www.digitalocean.com/community/tutorials/how-to-deploy-a-flask-application-on-an-ubuntu-vps
-
-
 
 
 
