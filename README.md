@@ -6,7 +6,7 @@ Live at [35.161.119.165][1]
 #### 1. Download RSA Key, restrict key access, and ssh into instance:
  -  `mv ~/Downloads/udacity_key.rsa ~/.ssh/`
  -  `chmod 600 ~/.ssh/udacity_key.rsa`
- -  `ssh -i ~/.ssh/udacity_key.rsa root@52.26.58.234`
+ -  `ssh -i ~/.ssh/udacity_key.rsa root@35.161.119.165`
 
 #### 2. Install & upgrade packages, git:
 Ubuntu Docs: [1][3] & [2][4]
