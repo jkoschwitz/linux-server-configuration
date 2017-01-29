@@ -2,7 +2,7 @@
 
 Live at [35.161.119.165][1]
 
-### Steps to setup FSND-P3 on a Ubuntu server
+### Steps to setup on a Ubuntu server
 #### 1. Download RSA Key, restrict key access, and ssh into instance:
  -  `mv ~/Downloads/udacity_key.rsa ~/.ssh/`
  -  `chmod 600 ~/.ssh/udacity_key.rsa`
