@@ -1,220 +1,175 @@
-### Instructions: How to complete this project?
+# Project Linux Server Configuration
 
-This project is linked to the Configuring Linux Web Servers course.
+Live at [35.161.119.165][1]
 
-1. Launch your Virtual Machine with your Udacity account. Please note that upon graduation from the program your free Amazon AWS instance will no longer be available.
+### Steps to setup FSND-P3 on a Ubuntu server
+#### 1. Download RSA Key, restrict key access, and ssh into instance:
+ -  `mv ~/Downloads/udacity_key.rsa ~/.ssh/`
+ -  `chmod 600 ~/.ssh/udacity_key.rsa`
+ -  `ssh -i ~/.ssh/udacity_key.rsa root@52.26.58.234`
 
-2. Follow the instructions provided to SSH into your server
+#### 2. Install & upgrade packages, git:
+Ubuntu Docs: [1][3] & [2][4]
+ -  `apt-get update`
+ - `sudo apt-get upgrade`
+ - `apt-get install unattended-upgrades`
+ - `dpkg-reconfigure -plow unattended-upgrades`
+ - `apt-get install git`
+ - `git config --global user.name "Julian"`
+ - `git config --global user.email "julian.koschwitz@gmail.com"`
 
-3. Create a new user named grader
+#### 3. Install & configure apache
+Udacity & Ubuntu: [1][5] & [2][6]
+ - `apt-get install apache2`
+ - `apt-get install python-setuptools libapache2-mod-wsgi`
+ - `echo "ServerName HOSTNAME" | sudo tee /etc/apache2/conf-available/fqdn.conf`
+ - `a2enconf fqdn`
+ - `apt-get install libapache2-mod-wsgi python-dev`
+ - `a2enmod wsgi`
+ - `service apache2 restart`
 
-4. Give the grader the permission to sudo
+#### 4. Clone & configure FSND-P3
+ - `cd /var/www/`
+ - `mkdir app`
+ - `cd app`
+ - `touch .htaccess | echo "RedirectMatch 404 /\.git" >> .htaccess`
+ - `mkdir app`
+ - `cd app`
+ - `git clone https://github.com/name/YOUR-CATALOG-PROJECT.git`
+ - `mv project.py __init__.py`
+ - `mv * ..`
+ - `cd ..`
 
-5. Update all currently installed packages
+#### 5. Install python packages
+ - `apt-get install python-pip`
+ - `pip install virtualenv`
+ - `virtualenv venv` 
+ - `chmod -R 777 venv`
+ - `pip install Flask-Seasurf`
+ - `pip install requests`
+ - `pip install --upgrade oauth2client`
+ - `pip install sqlalchemy`
+ - `apt-get install python-psycopg2`
+ - `pip install bleach`
 
-6. Change the SSH port from 22 to 2200
+#### 6. More apache config
+Apache Docs & Digital Ocean: [1][7] & [2][8]
 
-7. Configure the Uncomplicated Firewall (UFW) to only allow incoming connections for SSH (port 2200), HTTP (port 80), and NTP (port 123)
-
-8. Configure the local timezone to UTC
-
-9. Install and configure Apache to serve a Python mod_wsgi application
-
-10. Install and configure PostgreSQL:
-	Do not allow remote connections
-
-	Create a new user named catalog that has limited permissions to your catalog application database
-
-11. Install git, clone and setup your Catalog App project (from your GitHub repository from earlier in the Nanodegree program) so that it functions correctly when visiting your server’s IP address in a browser. Remember to set this up appropriately so that your .git directory is not publicly accessible via a browser!
-
-
-
-
-
-
-### Solution: What to do
-
-
-You can visit http://35.167.117.191 for the website deployed.
-
-## 1. Launch Virtual Machine
-
-## Instructions for SSH access to the instance
-
-1. Download Private Key
-
-2. Move the private key file into the folder `~/.ssh` (where ~ is your environment's home directory). So if you downloaded the file to the Downloads folder, just execute the following command in your terminal.
-	```mv ~/Downloads/udacity_key.rsa ~/.ssh/```
-
-3. Open your terminal and type in
-	```chmod 600 ~/.ssh/udacity_key.rsa```
-
-4. In your terminal, type in
-	```ssh -i ~/.ssh/udacity_key.rsa root@35.167.117.191```
-
-5. Development Environment Information
-
-	Public IP Address
-
-	35.167.117.191
-	
-	Private Key ( is not provided here. )
-
-## 2. Create a new user named grader
-
-1. `sudo adduser grader`
-2. `vim /etc/sudoers`
-3. `touch /etc/sudoers.d/grader`
-4. `vim /etc/sudoers.d/grader`, type in `grader ALL=(ALL:ALL) ALL`, save and quit
-
-## Set ssh login using keys
-1. generate keys on local machine using`ssh-keygen` ; then save the private key in `~/.ssh` on local machine
-2. deploy public key on developement enviroment
-
-	On you virtual machine:
-	```
-	$ su - grader
-	$ mkdir .ssh
-	$ touch .ssh/authorized_keys
-	$ vim .ssh/authorized_keys
-	```
-	Copy the public key generated on your local machine to this file and save
-	```
-	$ chmod 700 .ssh
-	$ chmod 644 .ssh/authorized_keys
-	```
-	
-3. reload SSH using `service ssh restart`
-4. now you can use ssh to login with the new user you created
-
-	`ssh -i [privateKeyFilename] grader@35.167.117.191`
-
-## Update all currently installed packages
-
-	sudo apt-get update
-	sudo apt-get upgrade
-
-## Change the SSH port from 22 to 2200
-1. Use `sudo vim /etc/ssh/sshd_config` and then change Port 22 to Port 2200 , save & quit.
-2. Reload SSH using `sudo service ssh restart`
-
-## Configure the Uncomplicated Firewall (UFW)
-
-Configure the Uncomplicated Firewall (UFW) to only allow incoming connections for SSH (port 2200), HTTP (port 80), and NTP (port 123)
-
-	sudo ufw allow 2200/tcp
-	sudo ufw allow 80/tcp
-	sudo ufw allow 123/udp
-	sudo ufw enable 
+```
+touch /etc/apache2/sites-available/app.conf | echo 
+  "<VirtualHost *:80>
+	      ServerName 35.161.119.165
+	      ServerAdmin admin@35.161.119.165
+	      ServerAlias ec2-52-24-181-252.us-west-2.compute.amazonaws.com
+	      WSGIScriptAlias / /var/www/app/app.wsgi
+	      <Directory /var/www/app/app/>
+	          Order allow,deny
+	          Allow from all
+	      </Directory>
+	      Alias /static /var/www/app/app/static
+	      <Directory /var/www/app/app/static/>
+	          Order allow,deny
+	          Allow from all
+	      </Directory>
+	      ErrorLog ${APACHE_LOG_DIR}/error.log
+	      LogLevel warn
+      CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>" >> 
+/etc/apache2/sites-available/app.conf
+```
+ - `a2ensite app`
+ - `cd ..` 
+ ```
+touch app.wsgi | echo '#!/usr/bin/python
+ import sys
+ import logging
+ logging.basicConfig(stream=sys.stderr)
+ sys.path.insert(0,"/var/www/app/")
  
-## Configure the local timezone to UTC
+ from app import app as application
+ application.secret_key = "Add your secret key"' >> app.wsgi
+```
+- `service apache2 restart`
 
-1. Configure the time zone `sudo dpkg-reconfigure tzdata`
-2. It is already set to UTC.
+#### 7. Install & config postgres & instantiate db
+Ubuntu Docs & Digital Ocean: [1][9] & [2][10]
+ - `apt-get install postgresql postgresql-contrib`
+ - `cd /etc/postgresql/9.3/main/`
+ - `su - postgres`
+ - `echo "CREATE USER catalog WITH PASSWORD 'catalogpw';" | psql`
+ - `echo "ALTER USER catalog CREATEDB;" | psql`
+ - `echo "CREATE DATABASE appdb WITH OWNER catalog;" | psql`
+ - `echo "REVOKE ALL ON SCHEMA public FROM public;" | psql`
+ - `echo "GRANT ALL ON SCHEMA public TO catalog;" | psql`
+ - `exit`
+ - `cd /var/www/app/app/`
+ **Note: Refactored __init__.py, database_setup.py & createDB.py for postgres compatibility.**
+ - `python database_setup.py`
+ - `python createDB.py`
 
+#### 8. NTP config
+Ubuntu Docs: [1][11] & [2][12]
+ - `dpkg-reconfigure tzdata`
+ - `apt-get install ntp`
+ - `vim /etc/ntp.conf` (edited to proper ntp server pool)
 
-## Install and configure Apache to serve a Python mod_wsgi application
+#### 9. Monitor & ban abuse
+Glances & Fail2ban: [1][13] & [2][14]
+ - `apt-get install python-pip build-essential python-dev`
+ - `pip install Glances`
+ - `apt-get install lm-sensors`
+ - `pip install PySensors`
+ - `apt-get install fail2ban`
+ - `cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local`
+ - `vim /etc/fail2ban/jail.local`
+  - set bantime  = 900
+  - destemail = grader@localhost
+ - `apt-get install sendmail iptables-persistent`
+ - `service fail2ban restart`
 
-1. Install Apache `sudo apt-get install apache2`
-2. Install mod_wsgi `sudo apt-get install python-setuptools libapache2-mod-wsgi`
-3. Restart Apache `sudo service apache2 restart`
-
-
-## Install and configure PostgreSQL
-
-1. Install PostgreSQL `sudo apt-get install postgresql`
-2. Check if no remote connections are allowed `sudo vim /etc/postgresql/9.3/main/pg_hba.conf`
-3. Login as user "postgres" `sudo su - postgres`
-4. Get into postgreSQL shell `psql`
-5. Create a new database named catalog  and create a new user named catalog in postgreSQL shell
-	
-	```
-	postgres=# CREATE DATABASE catalog;
-	postgres=# CREATE USER catalog;
-	```
-5. Set a password for user catalog
-	
-	```
-	postgres=# ALTER ROLE catalog WITH PASSWORD '123';
-	```
-6. Give user "catalog" permission to "catalog" application database
-	
-	```
-	postgres=# GRANT ALL PRIVILEGES ON DATABASE catalog TO catalog;
-	```
-7. Quit postgreSQL `postgres=# \q`
-8. Exit from user "postgres" 
-	
-	```
-	exit
-	```
-
+#### 10. Add User
+ -  `adduser grader`
+ -  `visudo` ( add "grader ALL=(ALL:ALL) ALL" under line "root ALL ..." )
  
-## Install git, clone and setup your Catalog App project.
+#### 11. SSH
+Arch Linux: [1][15]
+ - `vim /etc/ssh/sshd_config` (Enable password login)
+ - On local machine: `ssh-keygen`
+ - `scp ~/.ssh/id_rsa.pub grader@35.161.119.165:`
+ - Back on root session: `su - grader`
+ - `mkdir ~/.ssh`
+ - `chmod 700 ~/.ssh`
+ - `cat ~/id_rsa.pub >> ~/.ssh/authorized_keys`
+ - `rm ~/id_rsa.pub`
+ - `chmod 600 ~/.ssh/authorized_keys`
+ - `exit`
+ - `vim /etc/ssh/sshd_config` (Change ssh to 2200, Enforce ssh key login, Don't permit root login)
+ - `service ssh restart`
 
-1. Install Git using `sudo apt-get install git`
-2. Use `cd /var/www` to move to the /var/www directory 
-3. Create the application directory `sudo mkdir FlaskApp`
-4. Move inside this directory using `cd FlaskApp`
-5. Clone the Catalog App to the virtual machine `sudo git clone https://github.com/jkoschwitz/item-catalog`
-6. Rename the project's name `sudo mv ./item-catalog ./FlaskApp`
-7. Move to the inner FlaskApp directory using `cd FlaskApp`
-8. Rename `website.py` to `__init__.py` using `sudo mv website.py __init__.py`
-9. Install pip `sudo apt-get install python-pip`
-10. Use pip to install dependencies `sudo pip install -r requirements.txt`
-11. Install psycopg2 `sudo apt-get -qqy install postgresql python-psycopg2`
-
-
-## Configure and Enable a New Virtual Host
-
-1. Create FlaskApp.conf to edit: `sudo nano /etc/apache2/sites-available/FlaskApp.conf`
-2. Add the following lines of code to the file to configure the virtual host. 
-	
-	```
-	<VirtualHost *:80>
-		ServerName 35.167.117.191
-		ServerAdmin admin@gmail.com
-		WSGIScriptAlias / /var/www/FlaskApp/flaskapp.wsgi
-		<Directory /var/www/FlaskApp/FlaskApp/>
-			Order allow,deny
-			Allow from all
-		</Directory>
-		Alias /static /var/www/FlaskApp/FlaskApp/static
-		<Directory /var/www/FlaskApp/FlaskApp/static/>
-			Order allow,deny
-			Allow from all
-		</Directory>
-		ErrorLog ${APACHE_LOG_DIR}/error.log
-		LogLevel warn
-		CustomLog ${APACHE_LOG_DIR}/access.log combined
-	</VirtualHost>
-	```
-3. Enable the virtual host with the following command: `sudo a2ensite FlaskApp`
+#### 12. Firewall config
+Ufw Docs & Digital Ocean: [1][16] & [2][17]
+ - `ufw enable`
+ - `ufw allow 2200/tcp`
+ - `ufw allow 80/tcp`
+ - `ufw allow 123/udp`
+ - `service ufw restart`
+ - `exit` (Log out of root)
 
 
-## Create the .wsgi File
-
-1. Create the .wsgi File under /var/www/FlaskApp: 
-	
-	```
-	cd /var/www/FlaskApp
-	sudo nano flaskapp.wsgi 
-	```
-2. Add the following lines of code to the flaskapp.wsgi file:
-	
-	```
-	#!/usr/bin/python
-	import sys
-	import logging
-	logging.basicConfig(stream=sys.stderr)
-	sys.path.insert(0,"/var/www/FlaskApp/")
-
-	from FlaskApp import app as application
-	application.secret_key = 'Add your secret key'
-	```
-
-## Restart Apache
-1. Restart Apache `sudo service apache2 restart `
-
-
-
+[1]: http://35.161.119.165/
+[2]: http://ec2-52-24-181-212.us-west-2.compute.amazonaws.com/
+[3]: https://wiki.ubuntu.com/Security/Upgrades
+[4]: https://help.ubuntu.com/lts/serverguide/automatic-updates.html
+[5]: http://blog.udacity.com/2015/03/step-by-step-guide-install-lamp-linux-apache-mysql-python-ubuntu.html
+[6]: https://help.ubuntu.com/lts/serverguide/httpd.html
+[7]: http://httpd.apache.org/docs/2.2/en/mod/core.html#virtualhost
+[8]: https://www.digitalocean.com/community/tutorials/how-to-configure-the-apache-web-server-on-an-ubuntu-or-debian-vps
+[9]: https://help.ubuntu.com/community/PostgreSQL
+[10]: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-14-04
+[11]: https://help.ubuntu.com/community/UbuntuTime
+[12]: https://help.ubuntu.com/lts/serverguide/NTP.html
+[13]: https://pypi.python.org/pypi/Glances
+[14]: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-fail2ban-on-ubuntu-14-04
+[15]: https://wiki.archlinux.org/index.php/SSH_keys
+[16]: https://help.ubuntu.com/community/UFW
+[17]: https://www.digitalocean.com/community/tutorials/how-to-setup-a-firewall-with-ufw-on-an-ubuntu-and-debian-cloud-server
